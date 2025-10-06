@@ -1,0 +1,14 @@
+target/*
+src/main/python/city/*
+*.log.txt
+*.pyc
+src/main/python/pol/jar/pol.jar
+logs/*
+*.dava
+*.diff
+figs*
+fig/
+pol/maps/
+pol/maps/*
+pol/visualvm_*
+run/jar/pol.jar
