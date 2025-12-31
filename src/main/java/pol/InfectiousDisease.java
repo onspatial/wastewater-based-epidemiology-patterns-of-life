@@ -1,7 +1,10 @@
 package pol;
 
+import java.util.List;
+
 import pol.log.Characteristics;
 import pol.log.Skip;
+import pol.utils.CollectionUtil;
 
 /**
  * General description_________________________________________________________
@@ -16,15 +19,6 @@ public class InfectiousDisease extends InfectiousDiseaseAbstract {
     private static final long serialVersionUID = 1247800092072951968L;
 
     @Skip
-    private int numberOfDaysToBeExposed;
-    @Skip
-    private int numberOfDaysToBeInfectious;
-    @Skip
-    private int numberOfDaysToBeRecovered;
-    @Skip
-    private double smoothnessRate;
-
-    @Skip
     private int spreadCounter;
 
     @Characteristics
@@ -32,11 +26,9 @@ public class InfectiousDisease extends InfectiousDiseaseAbstract {
 
     public InfectiousDisease(Person agent) {
         super(agent);
-        this.status = DiseaseStatus.Susceptible;
+        this.setDiseaseStatus(DiseaseStatus.Susceptible);
         this.susceptibleStartedTime = agent.getSimulationTime();
-        this.numberOfDaysToBeExposed = params.numberOfDaysToBeExposed;
-        this.numberOfDaysToBeInfectious = params.numberOfDaysToBeInfectious;
-        this.numberOfDaysToBeRecovered = params.numberOfDaysToBeRecovered;
+
         this.spreadCounter = 0;
         this.sheddingRate = 0.0;
 
@@ -44,20 +36,6 @@ public class InfectiousDisease extends InfectiousDiseaseAbstract {
 
     public void resetSpreadCounter() {
         this.spreadCounter = 0;
-    }
-
-    private void smooth() {
-        this.numberOfDaysToBeExposed = smoothed(params.numberOfDaysToBeExposed);
-        this.numberOfDaysToBeInfectious = smoothed(params.numberOfDaysToBeInfectious);
-        this.numberOfDaysToBeRecovered = smoothed(params.numberOfDaysToBeRecovered);
-    }
-
-    private int smoothed(int value) {
-        return (int) Math.ceil(value + (0.5 - this.smoothnessRate) * value);
-    }
-
-    private double smoothed(double value) {
-        return value + (0.5 - this.smoothnessRate) * value;
     }
 
     @Override
@@ -70,20 +48,20 @@ public class InfectiousDisease extends InfectiousDiseaseAbstract {
                 break;
             case Exposed:
                 if (canBeInfectious()) {
-                    this.status = DiseaseStatus.Infectious;
+                    this.setDiseaseStatus(DiseaseStatus.Infectious);
                     this.infectiousStartedTime = agent.getSimulationTime();
                 }
                 break;
             case Infectious:
                 if (canBeRecovered()) {
-                    this.status = DiseaseStatus.Recovered;
+                    this.setDiseaseStatus(DiseaseStatus.Recovered);
                     this.recoveredStartedTime = agent.getSimulationTime();
                 }
                 break;
             case Recovered:
                 if (canBeSusceptible()) {
                     resetSpreadCounter();
-                    this.status = DiseaseStatus.Susceptible;
+                    this.setDiseaseStatus(DiseaseStatus.Susceptible);
                     this.susceptibleStartedTime = agent.getSimulationTime();
                     this.exposedStartedTime = null;
                     this.infectiousStartedTime = null;
@@ -94,10 +72,6 @@ public class InfectiousDisease extends InfectiousDiseaseAbstract {
                 // No action needed for None status
                 break;
         }
-    }
-
-    public double getRandomValue() {
-        return agent.getModel().random.nextDouble();
     }
 
     @Override
@@ -111,6 +85,41 @@ public class InfectiousDisease extends InfectiousDiseaseAbstract {
         return this.chanceOfInfection > getRandomValue() && params.infectionRatio > getRandomValue();
     }
 
+    public void spreadInfectionToOneAgent(Person anotherAgent) {
+        if (this.agent.getInfectiousDisease() != null && this.agent.getInfectiousDisease().isInfectious()) {
+            this.agent.getInfectiousDisease().infect(anotherAgent);
+        } else if (anotherAgent.getInfectiousDisease() != null
+                && anotherAgent.getInfectiousDisease().isInfectious()) {
+            anotherAgent.getInfectiousDisease().infect(this.agent);
+
+        }
+    }
+
+    public void spreadInfectionInCurrentUnit(int numberOfAgentsToInfect) {
+        if (agent.getCurrentUnit() == null) {
+            return;
+        }
+        List<Person> agentsInTheSameUnit = agent.getCurrentUnit().getCurrentAgents();
+        spreadInfectionToManyAgents(agentsInTheSameUnit, numberOfAgentsToInfect);
+    }
+
+    public void spreadInfectionToManyAgents(List<Person> listOfAgentsToInfect, int numberOfAgentsToInfect) {
+        listOfAgentsToInfect.remove(agent);
+        if (listOfAgentsToInfect.size() == 0) {
+            return;
+        }
+        CollectionUtil.shuffle(listOfAgentsToInfect, agent.getModel().random);
+        for (int count = 0; count < listOfAgentsToInfect.size() && count < numberOfAgentsToInfect; count++) {
+            Person agentToInfect = listOfAgentsToInfect.get(count);
+            agent.getInfectiousDisease().spreadInfectionToOneAgent(agentToInfect);
+        }
+    }
+
+    public void spreadInfectionToOneAgent(long anotherAgentId) {
+        Person anotherAgent = agent.getModel().getAgent(anotherAgentId);
+        spreadInfectionToOneAgent(anotherAgent);
+    }
+
     @Override
     public boolean infect(Person recipient) {
         boolean isInfected = false;
@@ -118,18 +127,18 @@ public class InfectiousDisease extends InfectiousDiseaseAbstract {
             return isInfected;
         }
         if (recipient != null && recipient != this.agent) {
-            isInfected = recipient.getInfectiousDisease().infect();
+            isInfected = recipient.getInfectiousDisease().becomeInfected(this.agent.getAgentId());
         }
         this.spreadCounter++;
         return isInfected;
     }
 
     @Override
-    public boolean infect() {
+    public boolean becomeInfected() {
         if (!isInfectionPossible()) {
             return false;
         }
-        this.status = DiseaseStatus.Exposed;
+        this.setDiseaseStatus(DiseaseStatus.Exposed);
         this.exposedStartedTime = this.agent.getSimulationTime();
         return true;
     }
@@ -147,27 +156,6 @@ public class InfectiousDisease extends InfectiousDiseaseAbstract {
     private boolean canBeSusceptible() {
         return this.status == DiseaseStatus.Recovered
                 && this.numberOfDaysToBeRecovered <= this.numberOfDaysHasBeenRecovered;
-    }
-
-    public int getNumberOfDaysToBeExposed() {
-        return numberOfDaysToBeExposed;
-    }
-
-    public int getNumberOfDaysToBeInfectious() {
-        return numberOfDaysToBeInfectious;
-    }
-
-    public int getNumberOfDaysToBeRecovered() {
-        return numberOfDaysToBeRecovered;
-    }
-
-    public double getSmoothnessRate() {
-        return this.smoothnessRate;
-    }
-
-    public void setSmoothnessRate(double smoothnessRate) {
-        this.smoothnessRate = smoothnessRate;
-        smooth();
     }
 
     public double getSheddingRate() {
@@ -191,11 +179,4 @@ public class InfectiousDisease extends InfectiousDiseaseAbstract {
         return this.spreadCounter;
     }
 
-    public void setDiseaseStatus(DiseaseStatus status) {
-        this.status = status;
-    }
-
-    public boolean isInfectious() {
-        return this.status == DiseaseStatus.Infectious;
-    }
 }

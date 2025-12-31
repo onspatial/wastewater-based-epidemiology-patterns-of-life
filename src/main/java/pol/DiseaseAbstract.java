@@ -1,9 +1,6 @@
 package pol;
 
-import org.joda.time.LocalDateTime;
-
 import pol.log.Skip;
-import pol.log.State;
 
 /**
  * General description_________________________________________________________
@@ -42,14 +39,6 @@ public abstract class DiseaseAbstract implements Condition, java.io.Serializable
 
     public void updatePathogenLevel(double dose) {
         this.pathogenLevel += dose;
-    }
-
-    public boolean infect(double dose) {
-        return true;
-    }
-
-    public boolean infect() {
-        return true;
     }
 
     public DiseaseStatus getStatus() {

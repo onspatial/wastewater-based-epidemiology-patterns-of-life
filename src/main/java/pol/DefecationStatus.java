@@ -4,7 +4,7 @@ package pol;
  * General description_________________________________________________________
  * An enumeration to represent five different stages of defecation status.
  * 
- * @author Hossein Amiri (hossein.amiri at gmu.edu)
+ * @author Hossein Amiri (hossein.amiri at emory.edu)
  * 
  */
 public enum DefecationStatus {

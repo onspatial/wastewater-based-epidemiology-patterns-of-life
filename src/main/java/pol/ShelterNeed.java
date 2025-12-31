@@ -55,9 +55,11 @@ public class ShelterNeed implements Need, java.io.Serializable {
 	@Override
 	public void satisfy() {
 
+		if (isSatisfied() == false && agent.getCurrentMode() != PersonMode.Transport) {
+			agent.getInfectiousDisease().spreadInfectionInCurrentUnit(agent.getModel().params.numberOfSpreadPerUnit);
+		}
 		// do nothing if dead, already satisfied, has no employment, or
 		// transporting to somewhere
-
 		if (agent.getLifeStatus() != LifeStatus.Alive || isSatisfied() == true
 				|| agent.getCurrentMode() == PersonMode.Transport) {
 			return;

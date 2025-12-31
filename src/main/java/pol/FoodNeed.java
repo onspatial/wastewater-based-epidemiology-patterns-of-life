@@ -155,6 +155,9 @@ public class FoodNeed implements Need, java.io.Serializable {
 			// agent.exitTheWorld(LifeStatus.DiedDueStarving); // RIP
 			return;
 		}
+		if (isSatisfied() == false && agent.getCurrentMode() != PersonMode.Transport) {
+			agent.getInfectiousDisease().spreadInfectionInCurrentUnit(agent.getModel().params.numberOfSpreadPerUnit);
+		}
 
 		if (isSatisfied() == false && currentMode != PersonMode.Transport
 				&& currentMode != PersonMode.AtRestaurant) { // if agent is
@@ -282,6 +285,7 @@ public class FoodNeed implements Need, java.io.Serializable {
 				mobility.beginToTransport(travel, mobility.getOrigin(),
 						mobility.getOriginUnit(), false);
 			}
+
 		}
 	}
 
@@ -354,4 +358,5 @@ public class FoodNeed implements Need, java.io.Serializable {
 	public FoodNeedStatus getStatus() {
 		return status;
 	}
+
 }

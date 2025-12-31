@@ -116,7 +116,9 @@ public class LoveNeed implements Need, java.io.Serializable {
 
 		// if all other needs are satisfied and agent is free, it goes to a bar
 		// if needs new friends
-
+		if (isSatisfied() == false && agent.getCurrentMode() != PersonMode.Transport) {
+			agent.getInfectiousDisease().spreadInfectionInCurrentUnit(agent.getModel().params.numberOfSpreadPerUnit);
+		}
 		if (agent.physiologicalNeedsSatisfied()
 				&& agent.getFinancialSafetyNeed().isSatisfied() == true
 				&& isSatisfied() == false
@@ -266,6 +268,7 @@ public class LoveNeed implements Need, java.io.Serializable {
 
 		else if (currentMode == PersonMode.AtRecreation) {
 			// agent is at recreational places like pubs
+
 			tryExpandingNetwork(false);
 
 			// agent stays certain time between based on a budget
@@ -274,13 +277,19 @@ public class LoveNeed implements Need, java.io.Serializable {
 				agent.travelToHome(VisitReason.Home_ComingBackFromPub);
 			}
 		} else if (currentMode == PersonMode.AtRestaurant) {
+
 			tryExpandingNetwork(true);
 		}
 
 		// if agents are at home while roommate is there, strengthen their
 		// connection.
 		else if (currentMode == PersonMode.AtHome) {
+
 			strengthenRoommateConnection();
+		} else if (currentMode == PersonMode.AtWork) {
+			// at work, try to connect with work friends
+
+			tryExpandingNetwork(true);
 		}
 	}
 
@@ -315,9 +324,8 @@ public class LoveNeed implements Need, java.io.Serializable {
 				.getCurrentAgents()); // get current agents in the building
 
 		currentAgents.remove(agent); // remove itself from the list
-
 		if (currentAgents.size() > 0) { // if there are more than one except for
-										// this agent.
+			// this agent.
 
 			CollectionUtil.shuffle(currentAgents, agent.getModel().random);
 
@@ -365,9 +373,8 @@ public class LoveNeed implements Need, java.io.Serializable {
 
 						break;
 					}
+					agent.getInfectiousDisease().spreadInfectionToOneAgent(p);
 				}
-				if (agent.getInfectiousDisease() != null && agent.getInfectiousDisease().isInfectious())
-					agent.getInfectiousDisease().infect(p);
 			}
 
 			// If the agent is bound to use only existing friends
@@ -446,6 +453,7 @@ public class LoveNeed implements Need, java.io.Serializable {
 									.setMeetingId(meetingId);
 
 						}
+						agent.getInfectiousDisease().spreadInfectionToOneAgent(agentToConnect);
 					}
 				}
 			}
@@ -470,8 +478,10 @@ public class LoveNeed implements Need, java.io.Serializable {
 				if (agentIds.get(i) != agent.getAgentId()) {
 					Long agentId = agentIds.get(i);
 					try {
-						agent.getModel().getAgent(agentId).getLoveNeed()
+						Person newPerson = agent.getModel().getAgent(agentId);
+						newPerson.getLoveNeed()
 								.strengthenTies(agent.getAgentId());
+						// strengthenTies(agentId);
 					} catch (Exception e) {
 						System.out.print(agent.getSimulationTime());
 						e.printStackTrace();
@@ -515,8 +525,9 @@ public class LoveNeed implements Need, java.io.Serializable {
 				agent.getModel().getVisualFriendFamilyGraph()
 						.addEdge(me + "--" + other, me, other, true);
 			}
-		}
 
+		}
+		agent.getInfectiousDisease().spreadInfectionToOneAgent(agentIdToConnect);
 	}
 
 	// Sociality Satisfied
@@ -530,11 +541,11 @@ public class LoveNeed implements Need, java.io.Serializable {
 		List<Person> roommates = new ArrayList<>(agent.getCurrentUnit()
 				.getCurrentAgents()); // get current agents at home
 		roommates.remove(agent); // remove itself
-
 		for (Person aRoommate : roommates) {
 			// interact with only awake roommate
 			if (aRoommate.getSleepNeed().getStatus() == SleepStatus.Awake)
 				strengthenTies(aRoommate.getAgentId());
+
 		}
 	}
 

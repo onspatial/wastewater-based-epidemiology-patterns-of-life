@@ -73,18 +73,12 @@ public class WorldParameters extends AnnotatedPropertied {
 	public static final double DEFAULT_DEFECATION_RATE_VALUE = 0.5;
 
 	// DISEASE
-	// <1 means susceptible, +1 means immune
-	public static final double DEFAULT_INFECTION_THRESHOLD = 2.0;
-	public static final double DEFAULT_EXPOSURE_THRESHOLD = 1.0;
-	public static final double DEFAULT_IMMUNITY_DECAY_RATE = 0.5;
-	public static final double DEFAULT_PATHOGEN_TRANSMISSION_RATE = 0.5;
-	public static final double DEFAULT_PATHOGEN_GROWTH_RATE = 0.05;
-	public static final double DEFAULT_PATHOGEN_DEATH_RATE = 0.1;
 	public static final int NUMBER_OF_DAYS_TO_BE_EXPOSED = 3;
 	public static final int NUMBER_OF_DAYS_TO_BE_INFECTIOUS = 3;
 	public static final int NUMBER_OF_DAYS_TO_BE_RECOVERED = 3;
 	public static final double INFECTION_RATIO = 0.1;
 	public static final int NUMBER_OF_SPREAD_PER_PERSON = 1;
+	public static final int NUMBER_OF_SPREAD_PER_UNIT = 1;
 	public static final int NUMBER_OF_INITIAL_INFECTED_AGENTS = 1;
 
 	// FINANCE
@@ -196,18 +190,12 @@ public class WorldParameters extends AnnotatedPropertied {
 	public double agentWalkingSpeed;
 
 	// disease parameters
-	public double defaultInfectionThreshold;
-	public double defaultExposureThreshold;
-	public double defaultImmunityDecayRate;
-	public double defaultPathogenTransmissionRate;
-	public double defaultPathogenGrowthRate;
-	public double defaultPathogenDeathRate;
 	public int numberOfDaysToBeExposed;
 	public int numberOfDaysToBeInfectious;
 	public int numberOfDaysToBeRecovered;
 	public int numberOfSpreadPerPerson;
+	public int numberOfSpreadPerUnit;
 	public int numberOfInitialInfectedAgents;
-
 	public double infectionRatio;
 
 	// economics/money parameters
@@ -432,17 +420,12 @@ public class WorldParameters extends AnnotatedPropertied {
 		agentWalkingSpeed = AGENT_WALKING_SPEED;
 
 		// disease parameters
-		defaultInfectionThreshold = DEFAULT_INFECTION_THRESHOLD;
-		defaultExposureThreshold = DEFAULT_EXPOSURE_THRESHOLD;
-		defaultImmunityDecayRate = DEFAULT_IMMUNITY_DECAY_RATE;
-		defaultPathogenTransmissionRate = DEFAULT_PATHOGEN_TRANSMISSION_RATE;
-		defaultPathogenGrowthRate = DEFAULT_PATHOGEN_GROWTH_RATE;
-		defaultPathogenDeathRate = DEFAULT_PATHOGEN_DEATH_RATE;
 		numberOfDaysToBeExposed = NUMBER_OF_DAYS_TO_BE_EXPOSED;
 		numberOfDaysToBeInfectious = NUMBER_OF_DAYS_TO_BE_INFECTIOUS;
 		numberOfDaysToBeRecovered = NUMBER_OF_DAYS_TO_BE_RECOVERED;
 		infectionRatio = INFECTION_RATIO;
 		numberOfSpreadPerPerson = NUMBER_OF_SPREAD_PER_PERSON;
+		numberOfSpreadPerUnit = NUMBER_OF_SPREAD_PER_UNIT;
 		numberOfInitialInfectedAgents = NUMBER_OF_INITIAL_INFECTED_AGENTS;
 
 		// economics/money parameters

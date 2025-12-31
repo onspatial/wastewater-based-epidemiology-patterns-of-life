@@ -549,6 +549,26 @@ public class ReservedLogChannels implements Serializable {
 		diseasesStatusTableMapper.addMap(schema.CheckinDataset.DiseasesStatusTable.PathogenLevel.name, col,
 				(o) -> ((Person) o).getInfectiousDisease().getPathogenLevel());
 
+		col = new Column();
+		col.index = 6;
+		col.name = "SourceAgentId";
+		diseasesStatusTableMapper.addMap(schema.CheckinDataset.DiseasesStatusTable.SourceAgentId.name, col,
+				(o) -> ((Person) o).getInfectiousDisease().getSourceAgentId());
+
+		col = new Column();
+		col.index = 7;
+		col.name = "HomeLocationX";
+		diseasesStatusTableMapper.addMap(schema.CheckinDataset.DiseasesStatusTable.HomeLocationX.name, col,
+				(o) -> ((Person) o).getHomeGeometry() == null ? null
+						: ((Person) o).getHomeGeometry().getGeometry().getCoordinate().x);
+
+		col = new Column();
+		col.index = 8;
+		col.name = "HomeLocationY";
+		diseasesStatusTableMapper.addMap(schema.CheckinDataset.DiseasesStatusTable.HomeLocationY.name, col,
+				(o) -> ((Person) o).getHomeGeometry() == null ? null
+						: ((Person) o).getHomeGeometry().getGeometry().getCoordinate().y);
+
 		OutputFormatter diseasesStatusData = new TableValueFormatter(diseasesStatusTableMapper);
 
 		OutputFormatter socialNetworkData = new TableFlatFormatterForRelation(

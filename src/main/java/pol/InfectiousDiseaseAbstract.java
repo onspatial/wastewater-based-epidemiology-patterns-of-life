@@ -33,11 +33,23 @@ public abstract class InfectiousDiseaseAbstract extends DiseaseAbstract {
     @Skip
     protected int numberOfDaysHasBeenRecovered;
 
+    @Skip
+    protected int numberOfDaysToBeExposed;
+    @Skip
+    protected int numberOfDaysToBeInfectious;
+    @Skip
+    protected int numberOfDaysToBeRecovered;
+    @Skip
+    protected double smoothnessRate;
+
     @Characteristics
     protected double chanceOfInfection;
 
     @Characteristics
     protected double chanceOfSpreading;
+
+    @Skip
+    protected long sourceAgentId;
 
     public InfectiousDiseaseAbstract(Person agent) {
         super(agent);
@@ -49,6 +61,12 @@ public abstract class InfectiousDiseaseAbstract extends DiseaseAbstract {
         this.numberOfDaysHasBeenExposed = 0;
         this.numberOfDaysHasBeenInfectious = 0;
         this.numberOfDaysHasBeenRecovered = 0;
+        this.chanceOfInfection = 0.0;
+        this.chanceOfSpreading = 0.0;
+        this.sourceAgentId = -1;
+        this.numberOfDaysToBeExposed = params.numberOfDaysToBeExposed;
+        this.numberOfDaysToBeInfectious = params.numberOfDaysToBeInfectious;
+        this.numberOfDaysToBeRecovered = params.numberOfDaysToBeRecovered;
     }
 
     @Override
@@ -70,6 +88,24 @@ public abstract class InfectiousDiseaseAbstract extends DiseaseAbstract {
                 // No action needed for None status
                 break;
         }
+    }
+
+    protected double getRandomValue() {
+        return agent.getModel().random.nextDouble();
+    }
+
+    protected void smooth() {
+        this.numberOfDaysToBeExposed = smoothed(params.numberOfDaysToBeExposed);
+        this.numberOfDaysToBeInfectious = smoothed(params.numberOfDaysToBeInfectious);
+        this.numberOfDaysToBeRecovered = smoothed(params.numberOfDaysToBeRecovered);
+    }
+
+    protected int smoothed(int value) {
+        return (int) Math.ceil(value + (0.5 - this.smoothnessRate) * value);
+    }
+
+    protected double smoothed(double value) {
+        return value + (0.5 - this.smoothnessRate) * value;
     }
 
     public int getNumberOfDays(LocalDateTime startTime) {
@@ -95,25 +131,32 @@ public abstract class InfectiousDiseaseAbstract extends DiseaseAbstract {
         return true;
     }
 
-    public boolean infect(Person recipient) {
-        if (!isSpreadingPossible()) {
-            return false;
-        }
-        if (recipient != null && recipient != this.agent) {
-            return recipient.getInfectiousDisease().infect();
-        }
-        return false;
-
-    }
-
-    @Override
-    public boolean infect() {
+    public boolean becomeInfected() {
         if (!isInfectionPossible()) {
             return false;
         }
         this.status = DiseaseStatus.Exposed;
         this.exposedStartedTime = this.agent.getSimulationTime();
         return true;
+    }
+
+    public boolean infect(Person recipient) {
+        if (!isSpreadingPossible()) {
+            return false;
+        }
+        if (recipient != null && recipient != this.agent) {
+            return recipient.getInfectiousDisease().becomeInfected(this.agent.getAgentId());
+        }
+        return false;
+
+    }
+
+    public boolean becomeInfected(long fromAgentId) {
+        if (this.becomeInfected()) {
+            this.setSourceAgentId(fromAgentId);
+            return true;
+        }
+        return false;
     }
 
     public LocalDateTime getSusceptibleStartedTime() {
@@ -162,6 +205,43 @@ public abstract class InfectiousDiseaseAbstract extends DiseaseAbstract {
 
     protected boolean isExposurePossible() {
         return this.status == DiseaseStatus.Susceptible;
+    }
+
+    public void setSourceAgentId(long sourceAgentId) {
+        this.sourceAgentId = sourceAgentId;
+    }
+
+    public long getSourceAgentId() {
+        return sourceAgentId;
+    }
+
+    public void setDiseaseStatus(DiseaseStatus status) {
+        this.status = status;
+    }
+
+    public boolean isInfectious() {
+        return this.status == DiseaseStatus.Infectious;
+    }
+
+    public int getNumberOfDaysToBeExposed() {
+        return numberOfDaysToBeExposed;
+    }
+
+    public int getNumberOfDaysToBeInfectious() {
+        return numberOfDaysToBeInfectious;
+    }
+
+    public int getNumberOfDaysToBeRecovered() {
+        return numberOfDaysToBeRecovered;
+    }
+
+    public double getSmoothnessRate() {
+        return this.smoothnessRate;
+    }
+
+    public void setSmoothnessRate(double smoothnessRate) {
+        this.smoothnessRate = smoothnessRate;
+        smooth();
     }
 
 }

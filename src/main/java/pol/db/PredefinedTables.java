@@ -59,6 +59,9 @@ public class PredefinedTables implements java.io.Serializable {
 			public Column InfectiousStartedTime = new Column();
 			public Column PathogenLevel = new Column();
 			public Column DiseaseStatus = new Column();
+			public Column SourceAgentId = new Column();
+			public Column HomeLocationX = new Column();
+			public Column HomeLocationY = new Column();
 		}
 	}
 

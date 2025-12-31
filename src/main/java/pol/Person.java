@@ -1036,4 +1036,11 @@ public class Person implements Steppable {
 		return infectiousDisease;
 	}
 
+	public MasonGeometry getHomeGeometry() {
+		if (shelterNeed.getCurrentShelter() != null) {
+			return shelterNeed.getCurrentShelter().getLocation();
+		}
+		return null;
+	}
+
 }

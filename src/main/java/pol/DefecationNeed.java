@@ -14,7 +14,7 @@ import pol.log.Skip;
  * where to defecate and so on. Each agent has one {@code DefecationNeed}
  * object.
  * 
- * @author Hossein Amiri (hossein.amiri at gmu.edu)
+ * @author Hossein Amiri (hossein.amiri at emory.edu)
  * 
  */
 public class DefecationNeed implements Need, java.io.Serializable {
@@ -113,6 +113,9 @@ public class DefecationNeed implements Need, java.io.Serializable {
 		WorldModel model = agent.getModel();
 		AgentMobility mobility = agent.getMobility();
 		DailyPlan dailyPlanForToday = agent.getTodaysPlan();
+		if (isSatisfied() == false && agent.getCurrentMode() != PersonMode.Transport) {
+			agent.getInfectiousDisease().spreadInfectionInCurrentUnit(agent.getModel().params.numberOfSpreadPerUnit);
+		}
 		if (isSatisfied() == false && currentMode != PersonMode.Transport) {
 			defecated();
 		}

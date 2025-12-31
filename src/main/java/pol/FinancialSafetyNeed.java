@@ -169,6 +169,10 @@ public class FinancialSafetyNeed implements Need, java.io.Serializable {
 			return;
 		}
 
+		if (isSatisfied() == false && agent.getCurrentMode() != PersonMode.Transport) {
+			agent.getInfectiousDisease().spreadInfectionInCurrentUnit(agent.getModel().params.numberOfSpreadPerUnit);
+		}
+
 		// financial safety need is checked here.
 		// if agent finance is not stable, find a new job or move to a
 		// cheaper house.
